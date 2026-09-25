@@ -5,9 +5,9 @@
  * background instrumental. One singleton instance, one <audio> element,
  * ever — safe to call play()/toggle() from as many places as you like.
  *
- * Reads its defaults from window.WEDDING_CONFIG.music (see
- * invitation.config.js) so a new couple's template only needs a new audio
- * file + a config edit, never a code change here.
+ * Reads its defaults from window.weddingData.music (see
+ * src/data/weddingData.js) so a new couple's template only needs a new audio
+ * file + a data edit, never a code change here.
  *
  * Usage:
  *   const music = WeddingMusicController.getInstance();
@@ -30,7 +30,7 @@
   };
 
   function readConfig() {
-    var fromWindow = (global.WEDDING_CONFIG && global.WEDDING_CONFIG.music) || {};
+    var fromWindow = (global.weddingData && global.weddingData.music) || {};
     return Object.assign({}, DEFAULT_CONFIG, fromWindow);
   }
 

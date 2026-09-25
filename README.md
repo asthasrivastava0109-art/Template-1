@@ -28,8 +28,10 @@ site, so no build command or output directory is needed).
   ReactDOM and Babel, which `support.js` loads from a CDN (unpkg) at runtime —
   no build step is required.
 - `support.js` — small runtime that parses and mounts the page above.
-- `invitation.config.js` — **the one file to edit for a new client** (see
-  below).
+- `src/data/weddingData.js` — **the one file to edit for a new client** (see
+  below). `src/data/types.d.ts` describes its shape for editor autocomplete.
+- `js/wedding-view.js` — turns the data into formatted dates, links, alt text
+  and calendar entries, and applies the theme colours. No need to edit it.
 - `js/wedding-music-controller.js` — reusable background-music controller.
 - `audio/wedding-instrumental.mp3` — the instrumental track (converted from
   the `.m4r` you sent).
@@ -74,39 +76,43 @@ Implemented exactly per spec:
 
 To swap the track for a new invitation: replace
 `audio/wedding-instrumental.mp3` (any filename works — just also update
-`music.src` in `invitation.config.js`).
+`music.src` in `src/data/weddingData.js`).
 
-## `invitation.config.js` — the reusable config file
+## `src/data/weddingData.js` — the reusable data file
 
-This is the single file meant to change per new client:
+**New client = edit `src/data/weddingData.js` + replace images/music.**
+No component or markup changes are needed.
 
-```js
-window.WEDDING_CONFIG = {
-  couple: { partnerA, partnerB, displayTitle },
-  wedding: { date, venueName, venueCity, venueRegion },
-  images: { heroImage, coverImage, gallery: [...] },
-  music: { src, initialVolume, targetVolume, fadeDuration, loop },
-  colors: { primary, secondary }
-};
-```
+It holds, in plain editable text:
 
-**Currently wired end-to-end from this file:**
-- All music behaviour (source, volume, fade timing, loop).
-- The page `<title>`.
-- The countdown timer's target date.
-- The "Add to calendar" `.ics` file's event names, venue text and filename.
-- The floating music button's accent color.
+| Key | What it controls |
+| --- | --- |
+| `couple` | Bride, groom, tagline (names also drive the page title, alt text, monogram, blessing text) |
+| `wedding` | Celebration dates (`YYYY-MM-DD`), city, state, time zone |
+| `venue` | Venue name, address, Google Maps link, pin position on the illustrated map |
+| `family` | Parents and grandparents for each side, with their labels |
+| `events` | Every event: name, date, start time, display time, venue, dress code, note, images. The countdown targets the first event; "Add to calendar" is built from this list |
+| `story` | Timeline milestones, quote, photo caption |
+| `contact` | WhatsApp RSVP number, main contact, extra numbers |
+| `assets` | Every photo/illustration path |
+| `music` | Track, volume, fade-in, loop |
+| `theme` | Main text/accent colours (applied as CSS variables `--wd-*`) |
+| `sections` | Show/hide each section (`true` / `false`) |
+| `animations` | Falling petals, mouse parallax, reveal-on-scroll |
 
-**Not yet wired (still hardcoded in `index.html`'s markup — by design, so this
-first pass didn't touch layout/animation code beyond music):** the couple's
-names, venue name and photo `<img>` tags appear directly in ~30–40 places
-across the page's headings, section labels and `alt` text (e.g. "Ritika",
-"Shashwat", "Ayodhya", `media/hero-red.png`, `media/couple.jpeg`, etc.).
-Swapping images today just means replacing files in `/media` with the same
-filenames; swapping the couple's names/venue text today means a
-find-and-replace across `index.html`. Fully wiring every one of those to
-`invitation.config.js` (so a new client needs **only** a config edit, zero
-markup edits) is a mechanical follow-up pass — say the word and I'll do it.
+It's plain JavaScript (not `.ts`) because the site has no build step — the
+browser loads it directly. `// @ts-check` plus `types.d.ts` still give type
+checking and autocomplete in VS Code.
+
+**Images with text drawn into them.** These must be redesigned for each new
+couple — editing the data file cannot change text inside a picture:
+`cover.png` (envelope), `seal-disc.png` (monogram), `hero-red.png`,
+`countdown-clean.png`, `venue-map.jpg`, `rsvp-clean.png`. They're marked
+`TEXT IN IMAGE` in the data file.
+
+**Link previews.** The page title is set from the data when the page loads.
+WhatsApp/social link previews read the raw HTML and will show the generic
+"Wedding Invitation" title.
 
 ## Notes
 
